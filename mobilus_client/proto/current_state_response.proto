@@ -1,0 +1,15 @@
+syntax = "proto2";
+
+message CurrentStateEvent {
+  optional int64 id = 1;
+  optional int64 device_id = 2;
+  optional int32 event_number = 3;
+  optional string value = 4;
+  optional int32 platform = 5;
+  optional int64 user = 6;
+  optional int64 inserttime = 7;
+}
+
+message CurrentStateResponse {
+  repeated CurrentStateEvent events = 1;
+}

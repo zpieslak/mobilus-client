@@ -1,0 +1,10 @@
+syntax = "proto2";
+
+message LoginResponse {
+  optional int32 login_status = 1;
+  optional bytes private_key = 2;
+  optional bytes public_key = 3;
+  optional bool admin = 4;
+  optional string serial_number = 5;
+  optional int64 user_id = 6;
+}

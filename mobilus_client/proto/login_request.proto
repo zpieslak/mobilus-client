@@ -1,0 +1,6 @@
+syntax = "proto2";
+
+message LoginRequest {
+  optional string login = 1;
+  optional bytes password = 2;
+}
