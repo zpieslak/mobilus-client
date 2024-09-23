@@ -4,6 +4,8 @@ This code provides a native Python client for Mobilus Cosmo GTW. It connects to 
 
 In order to use the client, configuration and setup need to be done on the Mobilus Cosmo GTW side. This includes creating a user and pairing the devices with the gateway.
 
+More information can be found on [blog post](https://codegyver.com/2024/09/22/mobilus-cosmo-gtw-reverse-engineering-a-radio-shutter-device/).
+
 ## Installation
 
 Install the required dependencies using pip:
