@@ -1,0 +1,31 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v3
+      with:
+        python-version: 3.11
+    - name: Install dependencies
+      run: pip install -r requirements.txt -r requirements_test.txt
+    - name: Lint with flake8
+      run: flake8 . --count --statistics
+    - name: Lint with mypy
+      run: mypy .
+    - name: Test
+      run: coverage run -m unittest -v
+    - name: Verify coverage
+      run: coverage report --fail-under=95
