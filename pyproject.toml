@@ -1,0 +1,59 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mobilus-client"
+dynamic = ["version"]
+description = "Python client for Mobilus Cosmo GTW"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "Zbigniew Pieślak", email = "zpieslak@gmail.com" }]
+dependencies = [
+    "paho-mqtt~=1.6.0",
+    "cryptography~=43.0",
+    "protobuf==5.28.1",
+]
+requires-python = ">=3.9"
+
+[project.optional-dependencies]
+test = [
+    "coverage~=7.0",
+    "factory-boy~=2.0",
+    "flake8~=7.0",
+    "mypy~=1.0",
+    "mypy-protobuf~=3.0",
+    "types-paho-mqtt~=1.0",
+    "types-protobuf~=5.28.0",
+]
+
+[project.urls]
+homepage = "https://github.com/zpieslak/mobilus-client"
+issues = "https://github.com/zpieslak/mobilus-client/issues"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build]
+exclude = [
+    ".*",
+    "tests/*",
+]
+
+[tool.mypy]
+strict = true
+
+[[tool.mypy.overrides]]
+module = "factory"
+ignore_missing_imports = true
+
+[tool.coverage.run]
+omit = [
+    "*/proto/*",
+    "tests/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "@abstractmethod",
+]
