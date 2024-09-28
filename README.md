@@ -1,6 +1,6 @@
 ## Mobilus Cosmo GTW Client
 
-![test workflow](https://github.com/zpieslak/mobilus-client-private/actions/workflows/test.yml/badge.svg)
+![test workflow](https://github.com/zpieslak/mobilus-client/actions/workflows/test.yml/badge.svg)
 
 This code provides a native Python client for the Mobilus Cosmo GTW. It connects directly to the gateway's MQTT broker and sends message commands to control the associated devices. The connection is established locally, so the client must be run on the same network as the gateway. Currently, the only tested and supported devices are radio shutters (Mobilus COSMO 2WAY).
 
@@ -10,9 +10,9 @@ More information can be found on [blog post](https://codegyver.com/2024/09/22/mo
 
 ## Installation
 
-Install the required dependencies using pip:
+Install the module with pip:
 
-    pip install -r requirements.txt
+    pip install mobilus-client
 
 ## Usage
 
@@ -53,11 +53,17 @@ Verbose mode can be enabled with the `--verbose` flag:
 
 The client is tested with Mobilus Cosmo GTW with shutter devices only (COSMO 2WAY). It is possible that it will work with other devices, but it is not guaranteed. The purpose of the client is to provide a simple way to control the devices without the need to use the official Mobilus Cosmo GTW web interface or app, and to integrate it with open-source systems like Home Assistant. I am not affiliated with Mobilus, and the client is provided as is.
 
-## Running the tests
+## Development
 
-Install test requirements:
+Clone the repository and navigate to the project directory.
+Install the package in editable mode with the following command:
 
-    pip install -r requirements-test.txt
+    pip install -e .[test]
+
+Check mypy and flake8 with the following commands:
+
+    mypy .
+    flake8 .
 
 The tests can be run with the following command:
 

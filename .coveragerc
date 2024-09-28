@@ -1,8 +1,0 @@
-[report]
-exclude_lines =
-    @abstractmethod
-
-[run]
-omit =
-    */proto/*
-    tests/*
