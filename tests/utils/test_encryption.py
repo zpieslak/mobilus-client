@@ -1,20 +1,26 @@
 import unittest
 from hashlib import sha256
 from struct import pack
-from mobilus_client.utils.encryption import create_iv, create_key, decrypt_body, encrypt_body
+
+from mobilus_client.utils.encryption import (
+    create_iv,
+    create_key,
+    decrypt_body,
+    encrypt_body,
+)
 
 
 class TestEncryption(unittest.TestCase):
     def test_create_iv(self) -> None:
         value = 123456
-        expected_iv = bytearray(b'\x00' * 12) + pack('>I', value)
+        expected_iv = bytearray(b"\x00" * 12) + pack(">I", value)
         result = create_iv(value)
 
         self.assertEqual(result, expected_iv)
 
     def test_create_key(self) -> None:
         value = "test_key"
-        expected_key = sha256(value.encode('utf-8')).digest()
+        expected_key = sha256(value.encode("utf-8")).digest()
         result = create_key(value)
 
         self.assertEqual(result, expected_key)

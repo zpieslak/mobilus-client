@@ -1,4 +1,5 @@
 import unittest
+
 from mobilus_client.registries.message import MessageRegistry
 from tests.factories import (
     CallEventsRequestFactory,

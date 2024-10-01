@@ -1,6 +1,7 @@
 import unittest
-from mobilus_client.messages.validator import MessageValidator
+
 from mobilus_client.messages.status import MessageStatus
+from mobilus_client.messages.validator import MessageValidator
 from tests.factories import (
     CallEventsRequestFactory,
     CurrentStateRequestFactory,

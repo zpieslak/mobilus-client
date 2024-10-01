@@ -1,5 +1,7 @@
 import json
+
 from google.protobuf.json_format import MessageToJson
+
 from mobilus_client.utils.types import MessageResponse
 
 
@@ -13,8 +15,8 @@ class MessageSerializer:
         return json.dumps(
             [
                 json.loads(
-                    MessageSerializer.serialize_to_json(message)
+                    MessageSerializer.serialize_to_json(message),
                 )
                 for message in messages
-            ]
+            ],
         )
