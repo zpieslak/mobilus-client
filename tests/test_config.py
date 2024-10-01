@@ -1,4 +1,5 @@
 import unittest
+
 from mobilus_client.config import Config
 from mobilus_client.utils.encryption import create_key
 

@@ -1,12 +1,17 @@
-from typing import Optional, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from mobilus_client.messages.status import MessageStatus
 from mobilus_client.proto import LoginResponse
-from mobilus_client.utils.types import MessageRequest, MessageResponse
+
+if TYPE_CHECKING:
+    from mobilus_client.utils.types import MessageRequest, MessageResponse
 
 
-class MessageValidator():
+class MessageValidator:
     @staticmethod
-    def validate(message: Optional[Union[MessageRequest, MessageResponse]]) -> MessageStatus:
+    def validate(message: MessageRequest | MessageResponse | None) -> MessageStatus:
         if message is None:
             return MessageStatus.UNKNOWN_MESSAGE
 

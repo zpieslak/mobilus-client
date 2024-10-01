@@ -1,11 +1,12 @@
 import socket
 import unittest
 from unittest.mock import Mock, patch
+
 from mobilus_client.app import App
 from mobilus_client.config import Config
 from mobilus_client.mqtt_client import MqttClient
-from mobilus_client.registries.message import MessageRegistry
 from mobilus_client.registries.key import KeyRegistry
+from mobilus_client.registries.message import MessageRegistry
 from tests.factories import (
     CallEventsRequestFactory,
 )
@@ -18,7 +19,7 @@ class TestApp(unittest.TestCase):
             gateway_host="host",
             user_login="login",
             user_password="password",
-            timeout_period=0
+            timeout_period=0,
         )
         self.app = App(self.config)
 
@@ -29,13 +30,13 @@ class TestApp(unittest.TestCase):
         self.assertIsInstance(self.app.client, MqttClient)
 
     @patch.object(MqttClient, "connect", side_effect=socket.gaierror, autospec=True)
-    def test_call_with_invalid_gateway_host(self, mock_connect: Mock) -> None:
+    def test_call_with_invalid_gateway_host(self, _mock_connect: Mock) -> None:
         result = self.app.call([("call_events", {})])
 
         self.assertEqual(result, "[]")
 
     @patch.object(MqttClient, "connect", side_effect=TimeoutError, autospec=True)
-    def test_call_with_timeout_gateway_host(self, mock_connect: Mock) -> None:
+    def test_call_with_timeout_gateway_host(self, _mock_connect: Mock) -> None:
         result = self.app.call([("call_events", {})])
 
         self.assertEqual(result, "[]")
@@ -49,7 +50,7 @@ class TestApp(unittest.TestCase):
 
     @patch.object(MqttClient, "connect", return_value=Mock(), autospec=True)
     @patch.object(MqttClient, "loop_start", return_value=Mock(), autospec=True)
-    def test_call_with_not_authenticated(self, mock_loop_start: Mock, mock_connect: Mock) -> None:
+    def test_call_with_not_authenticated(self, _mock_loop_start: Mock, _mock_connect: Mock) -> None:
         self.config.auth_timeout_period = 0.0005
         result = self.app.call([("call_events", {})])
 
@@ -77,7 +78,7 @@ class TestApp(unittest.TestCase):
         self.app.client.authenticated_event.set()
         self.app.client.completed_event.set()
         call_events_request = CallEventsRequestFactory(
-            event={"device_id": 1, "event_number": 1, "value": "value", "platform": 1}
+            event={"device_id": 1, "event_number": 1, "value": "value", "platform": 1},
         )
         self.app.message_registry.register_response(call_events_request)
 

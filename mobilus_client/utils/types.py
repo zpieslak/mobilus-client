@@ -1,4 +1,5 @@
 from typing import Union
+
 from mobilus_client.proto import (
     CallEventsRequest,
     CurrentStateRequest,
@@ -6,18 +7,18 @@ from mobilus_client.proto import (
     DevicesListRequest,
     DevicesListResponse,
     LoginRequest,
-    LoginResponse
+    LoginResponse,
 )
 
 MessageRequest = Union[
     CallEventsRequest,
     CurrentStateRequest,
     DevicesListRequest,
-    LoginRequest
+    LoginRequest,
 ]
 MessageResponse = Union[
     CallEventsRequest,
     CurrentStateResponse,
     DevicesListResponse,
-    LoginResponse
+    LoginResponse,
 ]

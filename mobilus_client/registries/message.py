@@ -1,5 +1,6 @@
 from collections import Counter
-from typing import List
+from typing import ClassVar
+
 from mobilus_client.proto import (
     CallEventsRequest,
     CurrentStateRequest,
@@ -7,22 +8,22 @@ from mobilus_client.proto import (
     DevicesListRequest,
     DevicesListResponse,
     LoginRequest,
-    LoginResponse
+    LoginResponse,
 )
 from mobilus_client.utils.types import MessageRequest, MessageResponse
 
 
 class MessageRegistry:
-    MESSAGE_MAP = {
+    MESSAGE_MAP: ClassVar[dict[type[MessageRequest], type[MessageResponse]]] = {
         CallEventsRequest: CallEventsRequest,
         CurrentStateRequest: CurrentStateResponse,
         DevicesListRequest: DevicesListResponse,
-        LoginRequest: LoginResponse
+        LoginRequest: LoginResponse,
     }
 
     def __init__(self) -> None:
-        self._requests: List[MessageRequest] = []
-        self._responses: List[MessageResponse] = []
+        self._requests: list[MessageRequest] = []
+        self._responses: list[MessageResponse] = []
 
     def register_request(self, message_request: MessageRequest) -> None:
         self._requests.append(message_request)
@@ -30,10 +31,10 @@ class MessageRegistry:
     def register_response(self, message_response: MessageResponse) -> None:
         self._responses.append(message_response)
 
-    def get_requests(self) -> List[MessageRequest]:
+    def get_requests(self) -> list[MessageRequest]:
         return self._requests
 
-    def get_responses(self) -> List[MessageResponse]:
+    def get_responses(self) -> list[MessageResponse]:
         return self._responses
 
     def all_responses_received(self) -> bool:

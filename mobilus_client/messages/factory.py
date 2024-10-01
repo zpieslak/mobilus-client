@@ -1,5 +1,7 @@
-from abc import ABC, abstractmethod
-from typing import Any, Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, ClassVar
+
 from mobilus_client.proto import (
     CallEvent,
     CallEventsRequest,
@@ -7,53 +9,51 @@ from mobilus_client.proto import (
     DevicesListRequest,
     LoginRequest,
 )
-from mobilus_client.utils.types import MessageRequest
+
+if TYPE_CHECKING:
+    from mobilus_client.utils.types import MessageRequest
 
 
-class MessageBuilder(ABC):
-    @abstractmethod
-    def build(self, **kwargs: Any) -> Optional[MessageRequest]:
-        pass
-
-
-class LoginMessageBuilder(MessageBuilder):
-    def build(self, **kwargs: Any) -> Optional[LoginRequest]:
-        if 'login' not in kwargs or 'password' not in kwargs:
-            return None
-
-        request = LoginRequest()
-        request.login = str(kwargs['login'])
-        request.password = bytes(kwargs['password'])
-        return request
-
-
-class DevicesListMessageBuilder(MessageBuilder):
-    def build(self, **kwargs: Any) -> DevicesListRequest:
-        return DevicesListRequest()
-
-
-class CurrentStateMessageBuilder(MessageBuilder):
-    def build(self, **kwargs: Any) -> CurrentStateRequest:
-        return CurrentStateRequest()
-
-
-class CallEventsMessageBuilder(MessageBuilder):
-    def build(self, **kwargs: Any) -> Optional[CallEventsRequest]:
-        if 'device_id' not in kwargs or 'value' not in kwargs:
+class CallEventsMessageBuilder:
+    def build(self, device_id: str = "", value: str = "", event_number: str = "6") -> CallEventsRequest | None:
+        if not device_id or not value:
             return None
 
         event = CallEvent()
-        event.event_number = int(kwargs.get('event_number', 6))
-        event.device_id = int(kwargs['device_id'])
-        event.value = str(kwargs['value'])
+        event.event_number = int(event_number)
+        event.device_id = int(device_id)
+        event.value = value
 
         request = CallEventsRequest()
         request.events.append(event)
         return request
 
 
+class CurrentStateMessageBuilder:
+    def build(self) -> CurrentStateRequest:
+        return CurrentStateRequest()
+
+
+class DevicesListMessageBuilder:
+    def build(self) -> DevicesListRequest:
+        return DevicesListRequest()
+
+
+class LoginMessageBuilder:
+    def build(self, login: str = "", password: bytes = b"") -> LoginRequest | None:
+        if not login or not password:
+            return None
+
+        request = LoginRequest()
+        request.login = login
+        request.password = password
+        return request
+
+
 class MessageFactory:
-    _builders = {
+    _builders: ClassVar[
+      dict[str, LoginMessageBuilder | DevicesListMessageBuilder | CurrentStateMessageBuilder | CallEventsMessageBuilder]
+     ] = {
         "call_events": CallEventsMessageBuilder(),
         "current_state": CurrentStateMessageBuilder(),
         "devices_list": DevicesListMessageBuilder(),
@@ -61,6 +61,6 @@ class MessageFactory:
     }
 
     @staticmethod
-    def create_message(message_name: str, **kwargs: Any) -> Optional[MessageRequest]:
+    def create_message(message_name: str, **kwargs: Any) -> MessageRequest | None: # noqa: ANN401
         builder = MessageFactory._builders.get(message_name)
         return builder.build(**kwargs) if builder else None

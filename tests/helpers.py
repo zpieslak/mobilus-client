@@ -1,5 +1,6 @@
 import struct
 import time
+
 from mobilus_client.messages.encryptor import MessageEncryptor
 from mobilus_client.utils.encryption import create_iv, encrypt_body
 from mobilus_client.utils.types import MessageResponse
@@ -24,6 +25,6 @@ def encrypt_message(message: MessageResponse, key: bytes) -> bytes:
     encrypted_body = encrypt_body(key, iv, body)
 
     return (
-        struct.pack('>IBI6sBB', length, category, timestamp, user_id, platform, response_code) +
+        struct.pack(">IBI6sBB", length, category, timestamp, user_id, platform, response_code) +
         encrypted_body
     )

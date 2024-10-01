@@ -1,11 +1,11 @@
 import logging
 import socket
-from typing import Dict, List, Tuple
+
 from mobilus_client.config import Config
 from mobilus_client.messages.serializer import MessageSerializer
 from mobilus_client.mqtt_client import MqttClient
-from mobilus_client.registries.message import MessageRegistry
 from mobilus_client.registries.key import KeyRegistry
+from mobilus_client.registries.message import MessageRegistry
 
 logger = logging.getLogger(__name__)
 
@@ -22,10 +22,10 @@ class App:
                 "config": config,
                 "key_registry": self.key_registry,
                 "message_registry": self.message_registry,
-            }
+            },
         )
 
-    def call(self, commands: List[Tuple[str, Dict[str, str]]]) -> str:
+    def call(self, commands: list[tuple[str, dict[str, str]]]) -> str:
         if not commands:
             return self._empty_response()
 
@@ -56,7 +56,7 @@ class App:
 
         # Return serialized responses from the message registry
         return MessageSerializer.serialize_list_to_json(
-            self.message_registry.get_responses()
+            self.message_registry.get_responses(),
         )
 
     def _empty_response(self) -> str:

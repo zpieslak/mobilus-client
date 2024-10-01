@@ -1,81 +1,84 @@
+from __future__ import annotations
+
 import logging
-import paho.mqtt.client as mqtt
 import threading
-from typing import Any, Dict, cast
+from typing import Any, cast
+
+import paho.mqtt.client as mqtt
+
 from mobilus_client.messages.encryptor import MessageEncryptor
 from mobilus_client.messages.factory import MessageFactory
 from mobilus_client.messages.status import MessageStatus
 from mobilus_client.messages.validator import MessageValidator
-from mobilus_client.proto import (LoginRequest, LoginResponse)
+from mobilus_client.proto import LoginRequest, LoginResponse
 from mobilus_client.utils.types import MessageRequest
-
 
 logger = logging.getLogger(__name__)
 
 
 class MqttClient(mqtt.Client):
-    _userdata: Dict[str, Any]
+    _userdata: dict[str, Any]
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(self, **kwargs: Any) -> None: # noqa: ANN401
+        super().__init__(**kwargs)
         self.authenticated_event = threading.Event()
         self.completed_event = threading.Event()
         self.enable_logger(logger)
 
-    def send_request(self, command: str, **params: Any) -> None:
+    def send_request(self, command: str, **params: str | bytes | int | None) -> None:
         if not self.is_connected():
-            logger.error(f"Sending request - {command} failed. Client is not connected.")
+            logger.error("Sending request - %s failed. Client is not connected.", command)
             return
 
         message = MessageFactory.create_message(command, **params)
         status = MessageValidator.validate(message)
 
         if status != MessageStatus.SUCCESS:
-            logger.error(f"Command - {command} returned an error - {status.name}")
+            logger.error("Command - %s returned an error - %s", command, status.name)
             self.disconnect()
             return
 
         if not isinstance(message, LoginRequest):
-            self._userdata['message_registry'].register_request(message)
+            self._userdata["message_registry"].register_request(message)
 
         encrypted_message = MessageEncryptor.encrypt(
             cast(MessageRequest, message),
             self._userdata["config"].client_id,
-            self._userdata['key_registry']
+            self._userdata["key_registry"],
         )
 
         self.publish("module", encrypted_message)
 
-    def on_disconnect(self, client: mqtt.Client, userdata: Any, reason_code: Any) -> None:  # type: ignore
-        logger.info(f"Disconnected with result code - {reason_code}")
+    def on_disconnect(self, _client: mqtt.Client, _userdata: dict[str, Any], reason_code: int) -> None:  # type: ignore[override]
+        logger.info("Disconnected with result code - %s", reason_code)
 
-    def on_connect(self, client: mqtt.Client, userdata: Any, flags: Any, reason_code: Any) -> None:  # type: ignore
+    def on_connect(self, client: mqtt.Client, userdata: dict[str, Any], *_args: Any) -> None:  # type: ignore[override] # noqa: ANN401
         client.subscribe([
             (userdata["config"].client_id, 0),
-            ("clients", 0)
+            ("clients", 0),
         ])
 
-    def on_subscribe(self, client: mqtt.Client, userdata: Any, mid: Any, granted_qos: Any) -> None:  # type: ignore
+    def on_subscribe(self, _client: mqtt.Client, userdata: dict[str, Any], *_args: Any) -> None:  # type: ignore[override]  # noqa: ANN401
         self.send_request(
             "login",
             login=userdata["config"].user_login,
-            password=userdata["config"].user_key
+            password=userdata["config"].user_key,
         )
 
-    def on_message(self, client: mqtt.Client, userdata: Any, message: Any) -> None:  # type: ignore
-        logger.info(f"Received message on topic - {message.topic}")
+    def on_message(self, _client: mqtt.Client, userdata: dict[str, Any], mqtt_message: mqtt.MQTTMessage) -> None:  # type: ignore[override]
+        logger.info("Received message on topic - %s", mqtt_message.topic)
 
-        message = MessageEncryptor.decrypt(message.payload, userdata["key_registry"])
-        logger.info(f"Decrypted message - {type(message).__name__}")
+        message = MessageEncryptor.decrypt(mqtt_message.payload, userdata["key_registry"])
+        logger.info("Decrypted message - %s", type(message).__name__)
 
         status = MessageValidator.validate(message)
 
         if status != MessageStatus.SUCCESS:
-            logger.error(f"Message - {type(message).__name__} returned an error - {status.name}")
+            logger.error("Message - %s returned an error - %s", type(message).__name__, status.name)
             self.disconnect()
             return
 
-        logger.info(f"Message - {type(message).__name__} validated successfully")
+        logger.info("Message - %s validated successfully", type(message).__name__)
 
         if isinstance(message, LoginResponse):
             userdata["key_registry"].register_keys(message)

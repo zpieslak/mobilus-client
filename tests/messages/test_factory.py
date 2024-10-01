@@ -1,4 +1,5 @@
 import unittest
+
 from mobilus_client.messages.factory import MessageFactory
 from mobilus_client.proto import (
     CallEventsRequest,

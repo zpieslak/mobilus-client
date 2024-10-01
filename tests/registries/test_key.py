@@ -1,16 +1,17 @@
 import unittest
-from mobilus_client.registries.key import KeyRegistry
-from tests.factories import (
-    LoginResponseFactory,
-)
+
 from mobilus_client.proto import (
     CallEventsRequest,
     CurrentStateRequest,
     CurrentStateResponse,
     DevicesListRequest,
     DevicesListResponse,
-    LoginResponse,
     LoginRequest,
+    LoginResponse,
+)
+from mobilus_client.registries.key import KeyRegistry
+from tests.factories import (
+    LoginResponseFactory,
 )
 
 
@@ -20,7 +21,7 @@ class TestKeyRegistry(unittest.TestCase):
         self.registry = KeyRegistry(self.user_key)
         self.login_response = LoginResponseFactory(
             private_key=b"test_private_key",
-            public_key=b"test_public_key"
+            public_key=b"test_public_key",
         )
         self.registry.register_keys(self.login_response)
 

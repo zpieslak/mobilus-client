@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 import struct
 import time
+from typing import TYPE_CHECKING, ClassVar, cast
+
 from google.protobuf.message import DecodeError
-from typing import cast, Optional
-from mobilus_client.registries.key import KeyRegistry
+
 from mobilus_client.proto import (
     CallEventsRequest,
     CurrentStateRequest,
@@ -10,14 +13,17 @@ from mobilus_client.proto import (
     DevicesListRequest,
     DevicesListResponse,
     LoginRequest,
-    LoginResponse
+    LoginResponse,
 )
 from mobilus_client.utils.encryption import create_iv, decrypt_body, encrypt_body
 from mobilus_client.utils.types import MessageRequest, MessageResponse
 
+if TYPE_CHECKING:
+    from mobilus_client.registries.key import KeyRegistry
+
 
 class MessageEncryptor:
-    CATEGORY_MAP = {
+    CATEGORY_MAP: ClassVar[dict[int, type[MessageRequest | MessageResponse]]] = {
         1: LoginRequest,
         2: LoginResponse,
         3: DevicesListRequest,
@@ -26,7 +32,9 @@ class MessageEncryptor:
         26: CurrentStateRequest,
         27: CurrentStateResponse,
     }
-    CLASS_TO_CATEGORY_MAP = {v: k for k, v in CATEGORY_MAP.items()}
+    CLASS_TO_CATEGORY_MAP: ClassVar[dict[type[MessageRequest | MessageResponse], int]] = {
+        v: k for k, v in CATEGORY_MAP.items()
+    }
 
     @staticmethod
     def encrypt(message: MessageRequest, client_id: str, key_registry: KeyRegistry) -> bytes:
@@ -44,16 +52,16 @@ class MessageEncryptor:
             encrypted_body = encrypt_body(private_key, iv, body)
 
         return (
-            struct.pack('>IBI', length, category, timestamp) +
+            struct.pack(">IBI", length, category, timestamp) +
             bytes.fromhex(client_id) +
-            struct.pack('>2B', 4, 0) +
+            struct.pack(">2B", 4, 0) +
             encrypted_body
         )
 
     @staticmethod
-    def decrypt(encrypted_message: bytes, key_registry: KeyRegistry) -> Optional[MessageResponse]:
+    def decrypt(encrypted_message: bytes, key_registry: KeyRegistry) -> MessageResponse | None:
         # Define header format and calculate size
-        header_format = '>IBI6sBB'
+        header_format = ">IBI6sBB"
         header_size = struct.calcsize(header_format)
 
         # Do early return if message is too short
@@ -69,8 +77,11 @@ class MessageEncryptor:
 
         # Choose proper klass
         message_klass = MessageEncryptor.CATEGORY_MAP.get(category)
+
         if message_klass is None:
             return None
+
+        message_klass = cast(type[MessageResponse], message_klass)
 
         # Choose proper decryption key
         key = key_registry.get_decryption_key(message_klass)
@@ -80,7 +91,7 @@ class MessageEncryptor:
         body = decrypt_body(key, iv, encrypted_body)
 
         try:
-            message = cast(MessageResponse, message_klass())
+            message = message_klass()
             message.ParseFromString(body)
         except DecodeError:
             return None

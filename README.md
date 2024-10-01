@@ -60,10 +60,10 @@ Install the package in editable mode with the following command:
 
     pip install -e .[test]
 
-Check mypy and flake8 with the following commands:
+Check mypy and ruff with the following commands:
 
     mypy .
-    flake8 .
+    ruff check
 
 The tests can be run with the following command:
 
