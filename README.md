@@ -73,3 +73,7 @@ To generate a coverage report:
 
     coverage run -m unittest discover
     coverage report
+
+To regenerate proto files
+
+    docker-compose up --build -f scripts/docker-compose.yml

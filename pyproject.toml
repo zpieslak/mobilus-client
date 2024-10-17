@@ -12,7 +12,7 @@ authors = [{name = "Zbigniew Pieślak", email = "zpieslak@gmail.com"}]
 dependencies = [
   "paho-mqtt~=1.6.0",
   "cryptography~=43.0",
-  "protobuf==5.28.1"
+  "protobuf~=4.0"
 ]
 requires-python = ">=3.9"
 
@@ -24,7 +24,7 @@ test = [
   "mypy-protobuf~=3.0",
   "ruff~=0.6.0",
   "types-paho-mqtt~=1.0",
-  "types-protobuf~=5.28.0"
+  "types-protobuf~=4.0"
 ]
 
 [project.urls]
@@ -45,6 +45,7 @@ omit = [
 [tool.hatch.build]
 exclude = [
   ".*",
+  "scripts/*",
   "tests/*"
 ]
 
