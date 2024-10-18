@@ -15,7 +15,6 @@ from tests.factories import (
 class TestApp(unittest.TestCase):
     def setUp(self) -> None:
         self.config = Config(
-            client_id="0123456789ABCDEF",
             gateway_host="host",
             user_login="login",
             user_password="password",

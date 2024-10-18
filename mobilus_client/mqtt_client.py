@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class MqttClient(mqtt.Client):
+    _client_id: bytes
     _userdata: dict[str, Any]
 
     def __init__(self, **kwargs: Any) -> None: # noqa: ANN401
@@ -43,7 +44,7 @@ class MqttClient(mqtt.Client):
 
         encrypted_message = MessageEncryptor.encrypt(
             cast(MessageRequest, message),
-            self._userdata["config"].client_id,
+            self._client_id.decode(),
             self._userdata["key_registry"],
         )
 
@@ -52,9 +53,9 @@ class MqttClient(mqtt.Client):
     def on_disconnect(self, _client: mqtt.Client, _userdata: dict[str, Any], reason_code: int) -> None:  # type: ignore[override]
         logger.info("Disconnected with result code - %s", reason_code)
 
-    def on_connect(self, client: mqtt.Client, userdata: dict[str, Any], *_args: Any) -> None:  # type: ignore[override] # noqa: ANN401
+    def on_connect(self, client: mqtt.Client, _userdata: dict[str, Any], *_args: Any) -> None:  # type: ignore[override] # noqa: ANN401
         client.subscribe([
-            (userdata["config"].client_id, 0),
+            (self._client_id.decode(), 0),
             ("clients", 0),
         ])
 

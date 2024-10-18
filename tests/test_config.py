@@ -15,9 +15,6 @@ class TestConfig(unittest.TestCase):
     def test_auth_timeout_period(self) -> None:
         self.assertEqual(self.config.auth_timeout_period, 30)
 
-    def test_client_id(self) -> None:
-        self.assertEqual(len(self.config.client_id), 12)
-
     def test_gateway_host(self) -> None:
         self.assertEqual(self.config.gateway_host, "host")
 

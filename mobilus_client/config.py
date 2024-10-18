@@ -1,5 +1,4 @@
-import secrets
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from mobilus_client.utils.encryption import create_key
 
@@ -11,7 +10,6 @@ class Config:
     user_password: str
 
     auth_timeout_period: float = 30
-    client_id: str = field(default_factory=lambda: secrets.token_hex(6).upper())
     gateway_port: int = 8884
     gateway_protocol: str = "websockets"
     timeout_period: float = 30
