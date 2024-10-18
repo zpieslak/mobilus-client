@@ -22,8 +22,8 @@ from tests.helpers import encrypt_message
 
 class TestMQTTClient(unittest.TestCase):
     def setUp(self) -> None:
+        self.client_id = "0123456789ABCDEF"
         self.config = Config(
-            client_id="0123456789ABCDEF",
             gateway_host="host",
             user_login="login",
             user_password="password",
@@ -33,7 +33,7 @@ class TestMQTTClient(unittest.TestCase):
         self.message_registry = MessageRegistry()
         self.key_registry = KeyRegistry(self.config.user_key)
         self.client = MqttClient(
-            client_id=self.config.client_id,
+            client_id=self.client_id,
             transport=self.config.gateway_protocol,
             userdata={
                 "config": self.config,
@@ -147,7 +147,7 @@ class TestMQTTClient(unittest.TestCase):
         mock_subscribe.assert_called_once_with(
             self.client,
             [
-                (self.config.client_id, 0),
+                (self.client_id, 0),
                 ("clients", 0),
             ],
         )

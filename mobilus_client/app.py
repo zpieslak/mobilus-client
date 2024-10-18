@@ -1,4 +1,5 @@
 import logging
+import secrets
 import socket
 
 from mobilus_client.config import Config
@@ -16,7 +17,7 @@ class App:
         self.message_registry = MessageRegistry()
         self.key_registry = KeyRegistry(config.user_key)
         self.client = MqttClient(
-            client_id=config.client_id,
+            client_id=secrets.token_hex(6).upper(),
             transport=config.gateway_protocol,
             userdata={
                 "config": config,
