@@ -72,7 +72,7 @@ The tests can be run with the following command:
 To generate a coverage report:
 
     coverage run -m unittest discover
-    coverage report
+    coverage report -m
 
 To regenerate proto files
 
