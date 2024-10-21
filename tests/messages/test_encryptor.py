@@ -1,3 +1,4 @@
+import sys
 import unittest
 from unittest.mock import Mock, patch
 
@@ -161,5 +162,8 @@ class TestMessageEncryptor(unittest.TestCase):
         encrypted_message = encrypt_message(message, b"test_invalid_key")
 
         result = MessageEncryptor.decrypt(encrypted_message, self.key_registry)
+
+        # Track flaky test
+        sys.stdout.write(f"result:{type(result)}:")
 
         self.assertIsNone(result)
