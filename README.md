@@ -28,7 +28,7 @@ Where:
 
 Currently, the following commands are supported:
 
-* `current_state` - Get the current state of the devices. Please note that in the case of shutters, this doesn't return any meaningful data.
+* `current_state` - Get the current state of the devices. Please note that in the case of shutters, the state may be delayed, especially when the shutter is controlled by a physical switch.
 
 * `devices_list` - List all devices that are paired with the gateway.
 
