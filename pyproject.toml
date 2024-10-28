@@ -11,20 +11,25 @@ license = {file = "LICENSE"}
 authors = [{name = "Zbigniew Pieślak", email = "zpieslak@gmail.com"}]
 dependencies = [
   "paho-mqtt~=1.6.0",
-  "cryptography~=43.0",
-  "protobuf~=4.0"
+  "cryptography>=35.0",
+  "protobuf>=3.20"
 ]
 requires-python = ">=3.9"
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
 
 [project.optional-dependencies]
 test = [
-  "coverage~=7.0",
-  "factory-boy~=2.0",
-  "mypy~=1.0",
-  "mypy-protobuf~=3.0",
-  "ruff~=0.6.0",
+  "coverage>=7.0",
+  "factory-boy>=3.0",
+  "mypy>=1.0",
+  "mypy-protobuf>=3.0",
+  "ruff>=0.6.0",
   "types-paho-mqtt~=1.0",
-  "types-protobuf~=4.0"
+  "types-protobuf>=3.20"
 ]
 
 [project.urls]
