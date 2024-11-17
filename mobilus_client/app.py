@@ -35,7 +35,6 @@ class App:
             if not client.connect_and_authenticate():
                 return self._empty_response()
 
-
             # Execute the provided commands
             for command, params in commands:
                 client.send_request(command, **params)

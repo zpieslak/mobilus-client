@@ -25,6 +25,8 @@ class Client:
             self, client_id: str, config: Config, key_registry: KeyRegistry, message_registry: MessageRegistry) -> None:
         self.config = config
         self.client_id = client_id
+        self.shared_topic = "clients"
+        self.command_topic = "module"
         self.key_registry = key_registry
         self.message_registry = message_registry
         self.authenticated_event = threading.Event()
@@ -68,7 +70,7 @@ class Client:
             self.key_registry,
         )
 
-        self.mqtt_client.publish("module", encrypted_message)
+        self.mqtt_client.publish(self.command_topic, encrypted_message)
 
     def terminate(self) -> None:
         self.mqtt_client.disconnect()
@@ -81,7 +83,7 @@ class Client:
             self, _client: mqtt.Client, _userdata: None, _flags: dict[str, Any], _reason_code: int) -> None:
         self.mqtt_client.subscribe([
             (self.client_id, 0),
-            ("clients", 0),
+            (self.shared_topic, 0),
         ])
 
     def on_subscribe_callback(self, _client: mqtt.Client, _userdata: None, _mid: int, _granted_qos: tuple[int]) -> None:
@@ -93,6 +95,11 @@ class Client:
 
     def on_message_callback(self, _client: mqtt.Client, _userdata: None, mqtt_message: mqtt.MQTTMessage) -> None:
         logger.info("Received message on topic - %s", mqtt_message.topic)
+
+        # Ignore messages from the shared topic sent by other clients until the client is authenticated.
+        if mqtt_message.topic == self.shared_topic and not self.authenticated_event.is_set():
+            logger.info("Client is not authenticated yet. Ignoring message.")
+            return
 
         message = MessageEncryptor.decrypt(mqtt_message.payload, self.key_registry)
         logger.info("Decrypted message - %s", type(message).__name__)
