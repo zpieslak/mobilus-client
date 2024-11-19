@@ -86,6 +86,9 @@ class MessageEncryptor:
         # Choose proper decryption key
         key = key_registry.get_decryption_key(message_klass)
 
+        if not key:
+            return None
+
         # Decrypt body
         iv = create_iv(timestamp)
         body = decrypt_body(key, iv, encrypted_body)

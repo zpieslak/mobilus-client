@@ -12,6 +12,8 @@ class KeyRegistry:
     def __init__(self, user_key: bytes) -> None:
         self._registry = {
             "user_key": user_key,
+            "private_key": b"",
+            "public_key": b"",
         }
 
     def get_keys(self) -> dict[str, bytes]:

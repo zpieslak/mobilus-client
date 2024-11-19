@@ -96,17 +96,16 @@ class Client:
     def on_message_callback(self, _client: mqtt.Client, _userdata: None, mqtt_message: mqtt.MQTTMessage) -> None:
         logger.info("Received message on topic - %s", mqtt_message.topic)
 
-        # Ignore messages from the shared topic sent by other clients until the client is authenticated.
-        if mqtt_message.topic == self.shared_topic and not self.authenticated_event.is_set():
-            logger.info("Client is not authenticated yet. Ignoring message.")
-            return
-
         message = MessageEncryptor.decrypt(mqtt_message.payload, self.key_registry)
         logger.info("Decrypted message - %s", type(message).__name__)
 
+        if message is None:
+            logger.info("Failed to decrypt message, ignoring")
+            return
+
         status = MessageValidator.validate(message)
 
-        if status != MessageStatus.SUCCESS or message is None:
+        if status != MessageStatus.SUCCESS:
             logger.error("Message - %s returned an error - %s", type(message).__name__, status.name)
             self.terminate()
             return
@@ -116,7 +115,7 @@ class Client:
         if isinstance(message, LoginResponse):
             self.key_registry.register_keys(message)
             self.authenticated_event.set()
-        else:
+        elif self.message_registry.is_expected_response(message):
             self.message_registry.register_response(message)
 
             if self.message_registry.all_responses_received():

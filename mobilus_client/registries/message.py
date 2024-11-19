@@ -37,6 +37,12 @@ class MessageRegistry:
     def get_responses(self) -> list[MessageResponse]:
         return self._responses
 
+    def is_expected_response(self, message_response: MessageResponse) -> bool:
+        return any(
+            isinstance(message_response, self.MESSAGE_MAP[type(request)])
+            for request in self.get_requests()
+        )
+
     def all_responses_received(self) -> bool:
         expected_responses = Counter(self.MESSAGE_MAP[type(request)] for request in self.get_requests())
         actual_responses = Counter(type(response) for response in self.get_responses())
