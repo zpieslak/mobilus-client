@@ -187,13 +187,13 @@ class TestClient(unittest.TestCase):
         mock_send_request.assert_called_once_with(
             self.client, "login", login=self.config.user_login, password=self.config.user_key)
 
-    @patch.object(mqtt.Client, "disconnect", return_value=Mock(), autospec=True)
-    def test_on_message_callback_invalid(self, mock_disconnect: Mock) -> None:
+    @patch("logging.Logger.info", return_value=Mock(), autospec=True)
+    def test_on_message_callback_invalid(self, mock_info: Mock) -> None:
         message = Mock(payload=b"invalid")
 
         self.client.on_message_callback(self.client.mqtt_client, None, message)
 
-        mock_disconnect.assert_called_once()
+        mock_info.assert_called_with(ANY, "Failed to decrypt message, ignoring")
 
     def test_on_message_login_response(self) -> None:
         login_response = LoginResponseFactory()
@@ -209,6 +209,17 @@ class TestClient(unittest.TestCase):
             "public_key": login_response.public_key,
         })
 
+    @patch.object(Client, "terminate", return_value=Mock(), autospec=True)
+    def test_on_message_login_response_unauthenticated(self, mock_terminate: Mock) -> None:
+        login_response = LoginResponseFactory(failed=True)
+        encrypted_message = encrypt_message(login_response, self.config.user_key)
+        message = Mock(payload=encrypted_message)
+
+        self.client.on_message_callback(self.client.mqtt_client, None, message)
+
+        self.assertFalse(self.client.authenticated_event.is_set())
+        mock_terminate.assert_called_once()
+
     def test_on_message_call_events_request_all_completed(self) -> None:
         login_response = LoginResponseFactory(public_key=b"test_public_key_")
         self.key_registry.register_keys(login_response)
@@ -222,9 +233,11 @@ class TestClient(unittest.TestCase):
         self.assertEqual(self.message_registry.get_responses(), [call_events_request])
         self.assertTrue(self.client.completed_event.is_set())
 
-    def test_on_message_current_state_response_not_all_completed(self) -> None:
+    def test_on_message_current_state_response_all_completed(self) -> None:
         login_response = LoginResponseFactory(private_key=b"test_private_key")
         self.key_registry.register_keys(login_response)
+        current_state_request = CurrentStateRequest()
+        self.message_registry.register_request(current_state_request)
 
         current_state_response = CurrentStateResponseFactory()
         encrypted_message = encrypt_message(current_state_response, login_response.private_key)
@@ -232,11 +245,15 @@ class TestClient(unittest.TestCase):
 
         self.client.on_message_callback(self.client.mqtt_client, None, message)
         self.assertEqual(self.message_registry.get_responses(), [current_state_response])
-        self.assertFalse(self.client.completed_event.is_set())
+        self.assertTrue(self.client.completed_event.is_set())
 
     def test_on_message_devices_list_response_not_all_completed(self) -> None:
         login_response = LoginResponseFactory(private_key=b"test_private_key")
         self.key_registry.register_keys(login_response)
+        device_list_request = DevicesListRequest()
+        current_state_request = CurrentStateRequest()
+        self.message_registry.register_request(device_list_request)
+        self.message_registry.register_request(current_state_request)
 
         devices_list_response = DevicesListResponseFactory()
         encrypted_message = encrypt_message(devices_list_response, login_response.private_key)
@@ -245,11 +262,3 @@ class TestClient(unittest.TestCase):
         self.client.on_message_callback(self.client.mqtt_client, None, message)
         self.assertEqual(self.message_registry.get_responses(), [devices_list_response])
         self.assertFalse(self.client.completed_event.is_set())
-
-    def test_on_message_shared_topic_when_not_authenticated(self) -> None:
-        login_response = LoginResponseFactory(private_key=b"test_private_key")
-        devices_list_response = DevicesListResponseFactory()
-        encrypted_message = encrypt_message(devices_list_response, login_response.private_key)
-        message = Mock(payload=encrypted_message, topic="clients")
-
-        self.client.on_message_callback(self.client.mqtt_client, None, message)

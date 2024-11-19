@@ -167,3 +167,12 @@ class TestMessageEncryptor(unittest.TestCase):
         sys.stdout.write(f"result:{type(result)}:")
 
         self.assertIsNone(result)
+
+    def test_decrypt_invalid_message_with_no_public_key(self) -> None:
+        self.key_registry = KeyRegistry(self.user_key)
+        message = CallEventsRequestFactory()
+        encrypted_message = encrypt_message(message, b"test_invalid_key")
+
+        result = MessageEncryptor.decrypt(encrypted_message, self.key_registry)
+
+        self.assertIsNone(result)
