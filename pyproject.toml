@@ -10,7 +10,7 @@ readme = "README.md"
 license = {file = "LICENSE"}
 authors = [{name = "Zbigniew Pieślak", email = "zpieslak@gmail.com"}]
 dependencies = [
-  "paho-mqtt~=1.6.0",
+  "paho-mqtt~=2.1.0",
   "cryptography>=35.0",
   "protobuf>=3.20"
 ]
