@@ -32,7 +32,7 @@ class Client:
         self.authenticated_event = threading.Event()
         self.completed_event = threading.Event()
 
-        self.mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, client_id=self.client_id, transport=config.gateway_protocol)
+        self.mqtt_client = mqtt.Client(client_id=self.client_id, transport=config.gateway_protocol)
         self._configure_client()
 
     def connect_and_authenticate(self) -> bool:
