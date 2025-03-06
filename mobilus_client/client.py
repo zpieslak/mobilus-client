@@ -86,7 +86,8 @@ class Client:
             (self.shared_topic, 0),
         ])
 
-    def on_subscribe_callback(self, _client: mqtt.Client, _userdata: None, _mid: int, _granted_qos: tuple[int]) -> None:
+    def on_subscribe_callback(
+            self, _client: mqtt.Client, _userdata: None, _mid: int, _granted_qos: tuple[int, ...]) -> None:
         self.send_request(
             "login",
             login=self.config.user_login,
