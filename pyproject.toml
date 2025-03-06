@@ -28,7 +28,6 @@ test = [
   "mypy>=1.0",
   "mypy-protobuf>=3.0",
   "ruff>=0.6.0",
-  "types-paho-mqtt~=1.0",
   "types-protobuf>=3.20"
 ]
 
@@ -69,6 +68,7 @@ exclude = ["*/proto/*"]
 line-length = 120
 
 [tool.ruff.lint]
+flake8-builtins.builtins-strict-checking = false
 ignore = ["D", "PT", "TRY400"]
 select = ["ALL"]
 
