@@ -16,10 +16,10 @@ from mobilus_client.proto import (
     LoginResponse,
 )
 from mobilus_client.utils.encryption import create_iv, decrypt_body, encrypt_body
-from mobilus_client.utils.types import MessageRequest, MessageResponse
 
 if TYPE_CHECKING:
     from mobilus_client.registries.key import KeyRegistry
+    from mobilus_client.utils.types import MessageRequest, MessageResponse
 
 
 class MessageEncryptor:
@@ -81,7 +81,7 @@ class MessageEncryptor:
         if message_klass is None:
             return None
 
-        message_klass = cast(type[MessageResponse], message_klass)
+        message_klass = cast("type[MessageResponse]", message_klass)
 
         # Choose proper decryption key
         key = key_registry.get_decryption_key(message_klass)

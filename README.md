@@ -4,11 +4,9 @@
 
 This code provides a native Python client for the Mobilus Cosmo GTW. It connects directly to the gateway's MQTT broker and sends message commands to control the associated devices. The connection is established locally, so the client must be run on the same network as the gateway. Note: internet access is not required and can be disabled on the device.
 
-Currently, the only tested and supported devices are radio shutters (Mobilus COSMO 2WAY).
-
 In order to use the client, configuration and setup need to be done on the Mobilus Cosmo GTW side. This includes creating a user and pairing the devices with the gateway.
 
-More information can be found on [blog post](https://codegyver.com/2024/09/22/mobilus-cosmo-gtw-reverse-engineering-a-radio-shutter-device/).
+The story behind the reverse engineering of this device, covering both the motivation and the process, is described in this [blog post](https://codegyver.com/2024/09/22/mobilus-cosmo-gtw-reverse-engineering-a-radio-shutter-device/).
 
 ## Installation
 
@@ -37,7 +35,7 @@ Currently, the following commands are supported:
 * `call_events:device_id=DEVICE_ID,value=VALUE` - Send a command to the device. This can be used for actual control of the device (shutter).
 
     * `DEVICE_ID` - The ID of the device as returned from devices_list.
-    * `VALUE` - The value to be sent to the device, currently one of "UP", "DOWN", "STOP", or a percentage value like "85%".
+    * `VALUE` - The value to be sent to the device, currently one of "UP", "DOWN", "STOP", "ON", "OFF", a percentage value like "85%" or "DOWN:60$" (for shutters, with tilt control).
 
 Multiple commands can be sent at once, separated by spaces:
 
@@ -53,7 +51,7 @@ Verbose mode can be enabled with the `--verbose` flag:
 
 ## Caveats
 
-The client is tested with Mobilus Cosmo GTW with shutter devices only (COSMO 2WAY). It is possible that it will work with other devices, but it is not guaranteed. The purpose of the client is to provide a simple way to control the devices without the need to use the official Mobilus Cosmo GTW web interface or app, and to integrate it with open-source systems like Home Assistant. I am not affiliated with Mobilus, and the client is provided as is.
+The client is tested with Mobilus Cosmo GTW and shutter devices only (COSMO 2WAY). However, it should also work with other devices supported by the Gateway (SENSO, COSMO, CMR, CGR, SWITCH, SWITCH_NP, COSMO_CZR, COSMO_MZR, SENSO_Z). The purpose of the client is to provide a simple way to control the devices without the need to use the official Mobilus Cosmo GTW web interface or app, and to integrate it with open-source systems like Home Assistant. I am not affiliated with Mobilus, and the client is provided as is.
 
 ## Development
 

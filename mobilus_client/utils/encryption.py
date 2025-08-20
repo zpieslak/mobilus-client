@@ -4,8 +4,8 @@ from struct import pack
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 
-def create_iv(value: int) -> bytearray:
-    return bytearray(b"\x00" * 12) + pack(">I", value)
+def create_iv(value: int) -> bytes:
+    return b"\x00" * 12 + pack(">I", value)
 
 
 def create_key(value: str) -> bytes:
