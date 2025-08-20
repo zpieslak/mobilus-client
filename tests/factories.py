@@ -64,7 +64,7 @@ class CurrentStateResponseFactory(BaseFactory):
         model = CurrentStateResponse
 
     @factory.post_generation  # type: ignore[misc]
-    def event(self, _create: bool | None, extracted: dict[str, str | int] | None) -> None:
+    def event(self, _create: bool | None, extracted: dict[str, str | int] | None) -> None: # noqa: FBT001
         event = CurrentStateEventFactory()
 
         if isinstance(extracted, dict):
@@ -96,7 +96,7 @@ class DevicesListResponseFactory(BaseFactory):
         model = DevicesListResponse
 
     @factory.post_generation  # type: ignore[misc]
-    def devices(self, _create: bool | None, extracted: dict[str, str | int | bytes] | None) -> None:
+    def devices(self, _create: bool | None, extracted: dict[str, str | int | bytes] | None) -> None: # noqa: FBT001
         device = DeviceFactory()
 
         if isinstance(extracted, list):
@@ -122,7 +122,7 @@ class CallEventsRequestFactory(BaseFactory):
         model = CallEventsRequest
 
     @factory.post_generation  # type: ignore[misc]
-    def event(self, _create: bool | None, extracted: dict[str, str | int] | None) -> None:
+    def event(self, _create: bool | None, extracted: dict[str, str | int] | None) -> None:  # noqa: FBT001
         event = CallEventFactory()
 
         if isinstance(extracted, dict):

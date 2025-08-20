@@ -69,9 +69,30 @@ class TestApp(unittest.TestCase):
         )
         mock_get_responses.return_value = [call_events_request]
 
-        result = self.app.call([("call_events", {"device_id": "1", "value": "value"})])
+        self.app.call([("call_events", {"device_id": "1", "value": "value"})])
 
         mock_connect.assert_called_once()
         mock_send_request.assert_called_once_with(ANY, "call_events", device_id="1", value="value")
+        mock_terminate.assert_called_once()
+    @patch.object(Client, "connect_and_authenticate", return_value=True, autospec=True)
+    @patch.object(Client, "send_request", return_value=Mock(), autospec=True)
+    @patch.object(Client, "terminate", return_value=Mock(), autospec=True)
+    @patch.object(MessageRegistry, "get_responses", autospec=True)
+    def test_call_with_multiple_commands(
+            self, mock_get_responses: Mock, mock_terminate: Mock, mock_send_request: Mock, mock_connect: Mock) -> None:
+        call_events_request = CallEventsRequestFactory(
+            event={"device_id": 1, "event_number": 1, "value": "value", "platform": 1},
+        )
+        mock_get_responses.return_value = [call_events_request]
+
+        result = self.app.call([
+            ("call_events", {"device_id": "1", "value": "value1"}),
+            ("call_events", {"device_id": "2", "value": "value2"}),
+        ])
+
+        mock_connect.assert_called_once()
+        self.assertEqual(mock_send_request.call_count, 2)
+        mock_send_request.assert_any_call(ANY, "call_events", device_id="1", value="value1")
+        mock_send_request.assert_any_call(ANY, "call_events", device_id="2", value="value2")
         mock_terminate.assert_called_once()
         self.assertEqual(result, '[{"events": [{"deviceId": "1", "eventNumber": 1, "value": "value", "platform": 1}]}]')

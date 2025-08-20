@@ -1,4 +1,4 @@
-name: Test
+name: CI
 
 on:
   push:
@@ -8,7 +8,24 @@ on:
     branches:
       - main
 jobs:
-  build:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: pip install -e ".[test]"
+      - name: Lint with ruff
+        run: ruff check --output-format=github .
+      - name: Lint with mypy
+        run: mypy .
+  test:
+    name: Test
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -22,11 +39,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: pip install -e ".[test]"
-      - name: Lint with ruff
-        run: ruff check --output-format=github .
-      - name: Lint with mypy
-        run: mypy .
       - name: Test
         run: coverage run -m unittest -v
       - name: Verify coverage
-        run: coverage report --fail-under=95
+        run: coverage report --fail-under=100
