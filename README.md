@@ -1,6 +1,6 @@
 ## Mobilus Cosmo GTW Client
 
-![test workflow](https://github.com/zpieslak/mobilus-client/actions/workflows/test.yml/badge.svg)
+![test workflow](https://github.com/zpieslak/mobilus-client/actions/workflows/ci.yml/badge.svg)
 
 This code provides a native Python client for the Mobilus Cosmo GTW. It connects directly to the gateway's MQTT broker and sends message commands to control the associated devices. The connection is established locally, so the client must be run on the same network as the gateway. Note: internet access is not required and can be disabled on the device.
 
