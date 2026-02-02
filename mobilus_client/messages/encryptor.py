@@ -69,7 +69,7 @@ class MessageEncryptor:
             return None
 
         # Unpack header
-        length, category, timestamp, user_id, platform, response_code = struct.unpack(
+        _length, category, timestamp, _user_id, _platform, _response_code = struct.unpack(
             header_format, encrypted_message[:header_size])
 
         # Extract encrypted body
