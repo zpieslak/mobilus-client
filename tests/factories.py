@@ -16,7 +16,7 @@ from mobilus_client.proto import (
 )
 
 
-class BaseFactory(factory.Factory):  # type: ignore[misc]
+class BaseFactory(factory.Factory): # type: ignore[misc]
     pass
 
 
@@ -63,7 +63,7 @@ class CurrentStateResponseFactory(BaseFactory):
     class Meta:
         model = CurrentStateResponse
 
-    @factory.post_generation  # type: ignore[misc]
+    @factory.post_generation # type: ignore[untyped-decorator]
     def event(self, _create: bool | None, extracted: dict[str, str | int] | None) -> None: # noqa: FBT001
         event = CurrentStateEventFactory()
 
@@ -95,7 +95,7 @@ class DevicesListResponseFactory(BaseFactory):
     class Meta:
         model = DevicesListResponse
 
-    @factory.post_generation  # type: ignore[misc]
+    @factory.post_generation # type: ignore[untyped-decorator]
     def devices(self, _create: bool | None, extracted: dict[str, str | int | bytes] | None) -> None: # noqa: FBT001
         device = DeviceFactory()
 
@@ -121,7 +121,7 @@ class CallEventsRequestFactory(BaseFactory):
     class Meta:
         model = CallEventsRequest
 
-    @factory.post_generation  # type: ignore[misc]
+    @factory.post_generation # type: ignore[untyped-decorator]
     def event(self, _create: bool | None, extracted: dict[str, str | int] | None) -> None:  # noqa: FBT001
         event = CallEventFactory()
 
