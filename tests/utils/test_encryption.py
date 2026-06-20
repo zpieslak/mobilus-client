@@ -36,6 +36,14 @@ class TestEncryption(unittest.TestCase):
         self.assertNotEqual(encrypted, plaintext)
         self.assertEqual(decrypted, plaintext)
 
+    def test_encrypt_body_matches_protocol_ciphertext(self) -> None:
+        key = create_key("secret_key")
+        iv = create_iv(12345)
+
+        encrypted = encrypt_body(key, iv, b"test message")
+
+        self.assertEqual(encrypted.hex(), "b1685184adead535a1d63b45")
+
     def test_decrypt_with_wrong_key(self) -> None:
         correct_key = create_key("correct_key")
         wrong_key = create_key("wrong_key")

@@ -1,7 +1,8 @@
 from hashlib import sha256
 from struct import pack
 
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.decrepit.ciphers.modes import CFB
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms
 
 
 def create_iv(value: int) -> bytes:
@@ -13,10 +14,10 @@ def create_key(value: str) -> bytes:
 
 
 def decrypt_body(key: bytes, iv: bytes, value: bytes) -> bytes:
-    decryptor = Cipher(algorithms.AES(key), modes.CFB(iv)).decryptor()
+    decryptor = Cipher(algorithms.AES(key), CFB(iv)).decryptor()
     return decryptor.update(value) + decryptor.finalize()
 
 
 def encrypt_body(key: bytes, iv: bytes, value: bytes) -> bytes:
-    encryptor = Cipher(algorithms.AES(key), modes.CFB(iv)).encryptor()
+    encryptor = Cipher(algorithms.AES(key), CFB(iv)).encryptor()
     return encryptor.update(value) + encryptor.finalize()
