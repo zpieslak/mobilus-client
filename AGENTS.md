@@ -1,103 +1,92 @@
 # AGENTS.md
 
-Root-scoped instructions for agents working in this repository. Keep guidance concrete, repository-specific, and updated when structure, commands, compatibility constraints, or release workflow changes.
+Project-specific rules for agents working in `mobilus-client`.
 
-## Project Overview
+## Core Constraints
 
-`mobilus-client` is a typed Python package and CLI for controlling a Mobilus Cosmo GTW gateway over its local MQTT broker. It must connect only to a user-provided local gateway; do not add cloud-service, public-internet, or vendor-hosted runtime dependencies.
+- Control only a user-provided local Mobilus Cosmo GTW gateway; do not add cloud, public-internet, or vendor-hosted runtime behavior.
+- Preserve protocol compatibility: default port `8884`, transport `websockets`, protobuf fields, category IDs, and encryption framing.
+- Keep CLI stdout as stable JSON command output; diagnostics/logging go to stderr.
+- Maintain 100% coverage for non-generated code.
 
-Core responsibilities:
+## Architecture
 
-- MQTT login/session handling, request publishing, response matching, protobuf serialization, and CLI JSON output.
-- Compatibility with Mobilus Cosmo GTW protocol details: protobuf field names, category IDs, encryption framing, default port `8884`, and default protocol `websockets`.
+```text
+CLI (__main__.py) parses arguments into Config
+  -> App orchestrates commands and serializes responses
+  -> Client manages MQTT lifecycle, authentication, publishing, and callbacks
+       -> messages/, registries/, proto/, and utils/ support protocol handling
+  <-> local MQTT gateway
+```
 
-## Non-Negotiables
+Keep orchestration/serialization in `App`, MQTT lifecycle in `Client`, and protocol construction/validation/encryption in `messages/`.
 
-- Tests and CI must be fully mocked/local: no real gateway, real MQTT broker, cloud service, or internet access.
-- Never commit or log real gateway hosts, credentials, keys, derived `user_key`, session keys, gateway IPs, or captured payloads.
-- Documentation examples must use synthetic placeholders such as `GATEWAY_HOST`, `USER_LOGIN`, and `USER_PASSWORD`.
-- CLI stdout is reserved for JSON command results; use logging for diagnostics.
-- Do not create commits or tags unless explicitly asked.
+## Hard Boundaries
 
-## Worktree Safety
+- Never expose or commit real gateway hosts, credentials, keys, derived `user_key` values, session keys, gateway IPs, or captured payloads.
+- Keep tests fully mocked/local; do not contact a real gateway, MQTT broker, cloud service, public internet, or vendor-hosted runtime.
+- Use synthetic placeholders in docs/tests: `GATEWAY_HOST`, `USER_LOGIN`, `USER_PASSWORD`.
+- Do not broaden public CLI, protocol, dependency, CI, release, or cloud behavior unless the task requires it.
+- Do not hand-edit generated `_pb2.py` or `_pb2.pyi` files.
 
-Before editing, inspect `git status --short`. Preserve unrelated tracked and untracked changes. Do not run `git clean`, `git reset --hard`, delete files, or reformat unrelated files unless explicitly asked. Keep changes focused and mention pre-existing modified or untracked files in the handoff.
+## Checks
 
-## Environment And Checks
-
-- Runtime Python is `>=3.9`; CI tests Python `3.9` through `3.14`.
-- Runtime dependencies are `paho-mqtt`, `cryptography`, and `protobuf`; prefer the standard library and existing dependencies.
-- Install development dependencies with `python -m pip install -e ".[test]"`.
-
-Run the narrowest relevant checks while iterating. Before handoff, run the full local gate unless the change is docs-only, user-limited, or tools are unavailable:
+Runtime Python is `>=3.9`; CI tests Python `3.9` through `3.14`. Install dev deps if needed:
 
 ```bash
+python -m pip install -e ".[test]"
+```
+
+Use narrow checks while iterating:
+
+```bash
+python -m unittest tests.test_config.TestConfig.test_gateway_host
+python -m ruff check mobilus_client/config.py tests/test_config.py
+python -m mypy mobilus_client/config.py
+```
+
+Full local gate:
+
+```bash
+set -e
+COVERAGE_FILE="$(mktemp -t mobilus-client-coverage.XXXXXX)"
+export COVERAGE_FILE
+trap 'rm -f "$COVERAGE_FILE"' EXIT
 python -m ruff check --output-format=github .
 python -m mypy .
 python -m coverage run -m unittest -v
 python -m coverage report --fail-under=100
 ```
 
-Coverage is expected to remain at 100% for non-generated code. For release, dependency, or packaging changes, also run:
+For dependency, packaging, release, or build metadata changes also run `python -m pip install build` and `python -m build`. For package contents/installability changes, inspect distributions and test wheel installation in a temp venv.
 
-```bash
-python -m pip install build
-python -m build
-```
+## Task Routes
 
-If checks are skipped or fail for environment reasons, report the exact command, reason, and remaining risk.
-
-## Repository Map
-
-- `mobilus_client/__main__.py`, `app.py`, `client.py`, `config.py`: CLI parsing, orchestration, MQTT lifecycle, and runtime configuration.
-- `mobilus_client/messages/`: message factory, validation, encryption/decryption, serialization, and status handling.
-- `mobilus_client/registries/`: encryption key and request/response tracking.
-- `mobilus_client/proto/`: tracked `.proto` files plus generated `_pb2.py` and `_pb2.pyi` files.
-- `mobilus_client/utils/`: shared encryption helpers and protobuf type aliases.
-- `tests/`: `unittest` suite using mocked MQTT/orchestration seams.
-- `scripts/`: Docker Compose/protoc helper for protobuf regeneration.
+- New/changed CLI command: inspect `__main__.py`, `app.py`, and nearest command; update `__main__.py` only for CLI interface changes and `config.py` only for runtime configuration; update protocol builders/validation/registries/category maps/type unions/protobuf exports only where required; add focused tests and README usage.
+- MQTT/session behavior: start with `client.py`, then inspect `registries/`, `messages/`, and related tests.
+- Encryption/protocol behavior: inspect `messages/`, `mobilus_client/utils/`, protobuf definitions, tests, and deterministic time patches.
+- Protobuf message changes: edit `.proto` files, follow Protobuf Workflow, and review generated diffs.
+- CLI output/logging behavior: add a CLI-level test that stdout contains only final JSON and `--verbose` diagnostics go to stderr.
+- User-visible behavior: update `README.md` and tests together.
 
 ## Code And Tests
 
-- Follow `pyproject.toml` for Ruff, mypy, and coverage configuration; do not duplicate or weaken those settings.
-- Use module loggers via `logging.getLogger(__name__)`; avoid stray `print()` in package logic.
-- Keep imports type-safe. Use annotation-only imports under `if TYPE_CHECKING:` when needed.
-- Use targeted `# noqa: RULE` and `# type: ignore[...]` only when necessary and clear.
-- Use `unittest.TestCase`; do not introduce pytest-only patterns unless the project intentionally migrates.
-- Use `unittest.mock.patch` for MQTT, sockets, time, logging, and orchestration seams.
-- Use `tests/factories.py` for protobuf objects and `tests/helpers.py` for encrypted-message helpers.
-- Patch `time.time` for byte-level encryption assertions so encrypted payloads are deterministic.
-- Keep tests credential-free; inert placeholder passwords/keys are acceptable fixtures.
-
-## MQTT, Commands, And Protocol Boundaries
-
-- Keep MQTT lifecycle and callbacks in `Client`; keep high-level command orchestration in `App`.
-- Preserve public CLI behavior unless intentionally changing it:
-  - required flags: `--host`, `--login`, `--password`;
-  - optional flag: `--verbose`;
-  - command syntax such as `current_state`, `devices_list`, and `call_events:device_id=DEVICE_ID,value=VALUE`;
-  - command results written to stdout as JSON.
-- When adding commands or protobuf message types, update the relevant `MessageFactory` builder, `MessageRegistry` mapping, `MessageEncryptor` category maps, message unions in `mobilus_client/utils/types.py`, `mobilus_client/proto/__init__.py` exports if needed, tests, and README usage.
+- Use `unittest.TestCase` and `unittest.mock.patch`; do not introduce pytest-only patterns.
+- Mock MQTT, sockets, time, logging, orchestration, gateways, and brokers.
+- Use `tests/factories.py` for populated protobuf fixtures and `tests/helpers.py` for encrypted-message helpers.
+- Patch `time.time` for byte-level encryption assertions.
+- Keep tests credential-free; avoid coverage-only assertions/branches.
 
 ## Protobuf Workflow
 
-Do not hand-edit generated `_pb2.py` or `_pb2.pyi` files. Edit `.proto` files, then regenerate with:
+Edit `.proto` files only, then regenerate runtime modules and stubs:
 
 ```bash
-docker compose -f scripts/docker-compose.yml up --build
+docker compose -f scripts/docker-compose.yml run --build --rm --user "$(id -u):$(id -g)" protoc
 ```
 
-The helper must generate both runtime `_pb2.py` modules and `_pb2.pyi` stubs. If it does not, fix the helper or report incomplete regeneration. Review generated diffs carefully and include generated files with the `.proto` change.
+If both `_pb2.py` and `_pb2.pyi` are not regenerated, fix/report the helper. Review generated diffs and update README Development if this command changes.
 
-## Documentation, Packaging, And Handoff
+## Handoff
 
-- Update `README.md` for user-visible behavior changes: installation, dependencies, CLI flags, command syntax, JSON output shape, supported `call_events` values, protobuf/protocol assumptions, or gateway compatibility notes.
-- Packaging uses `hatchling` with `hatch-vcs`; builds exclude dotfiles, `scripts/`, and `tests/`.
-- The package is typed via `mobilus_client/py.typed`; keep public type information accurate.
-- Publish workflow runs only for tags matching `v*` and uses trusted publishing to PyPI.
-- In reviews, flag cloud/public-internet dependencies, real gateway/MQTT test requirements, protocol changes without tests/docs, or secret leakage.
-- In handoff notes, call out changes to CLI flags, commands, protobuf files, MQTT behavior, dependencies, packaging, CI, or release behavior.
-
-## Generated And Local Files
-
-Do not stage tool caches, coverage reports, build artifacts, or scratch files. Keep common local outputs ignored or remove them before handoff, including `.mypy_cache/`, `.ruff_cache/`, `.pytest_cache/`, `htmlcov/`, `build/`, `dist/`, `.coverage`, and `tmp/`. Do not rely on untracked local state.
+Call out validation and any user-visible, protocol, MQTT, protobuf, dependency, build, CI, or release impact.
