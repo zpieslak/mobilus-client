@@ -10,7 +10,7 @@ services:
       /usr/local/bin/protoc,
       --proto_path=./mobilus_client/proto/,
       --mypy_out=./mobilus_client/proto/,
-      # --python_out=./mobilus_client/proto/,
+      --python_out=./mobilus_client/proto/,
       call_events_request.proto,
       current_state_request.proto,
       current_state_response.proto,
