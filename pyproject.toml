@@ -27,7 +27,7 @@ test = [
   "factory-boy==3.3.1",
   "mypy>=1.0",
   "mypy-protobuf>=3.0",
-  "ruff>=0.9.0",
+  "ruff==0.16.1",
   "types-protobuf>=3.20"
 ]
 
@@ -69,7 +69,7 @@ line-length = 120
 
 [tool.ruff.lint]
 flake8-builtins.builtins-strict-checking = false
-ignore = ["D", "PT", "TRY400"]
+ignore = ["CPY001", "D", "PT", "TRY400"]
 select = ["ALL"]
 
 [tool.ruff.lint.per-file-ignores]
